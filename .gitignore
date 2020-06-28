@@ -103,3 +103,6 @@ dist/
 # Temporary folders
 tmp/
 temp/
+
+# For personal settings (host, password, etc.)
+./settings

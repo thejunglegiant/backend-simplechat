@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const { Pool } = require('pg');
+const settings = require('./settings');
 
 const pool = new Pool({
-    user: 'TheJungleGiant',
-    host: 'localhost',
+    user: settings.USER,
+    host: settings.URL,
     database: 'SimpleChat',
-    password: 'alex55',
-    port: 5432,
-  });
+    password: settings.PASSWORD,
+    port: settings.PORT,
+});
 
 router.get('/', (req, res) => {
     res.send('Server works');

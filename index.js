@@ -3,14 +3,15 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const { Pool } = require('pg');
 const bodyparser = require('body-parser');
+const settings = require('./settings');
 
 const pool = new Pool({
-    user: 'TheJungleGiant',
-    host: 'localhost',
+    user: settings.USER,
+    host: settings.URL,
     database: 'SimpleChat',
-    password: 'alex55',
-    port: 5432,
-  });
+    password: settings.PASSWORD,
+    port: settings.PORT,
+});
 
 const PORT = process.env.PORT || 3000;
 
