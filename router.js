@@ -58,13 +58,13 @@ router.get('/:userId/getRooms', async (req, res) => {
     const check = await pool.query('SELECT * FROM users WHERE id = $1', [req.params.userId]);
     if (check.rowCount > 0) {
         const availableRooms = await pool.query(
-            'SELECT rooms.title, users.firstname, messages.body AS last_message, MAX(messages.sendingtime) AS stime ' +
+            'SELECT rooms.id, rooms.title, users.firstname, messages.body AS last_message, MAX(messages.sendingtime) AS stime ' +
             'FROM userrooms ' +
             'LEFT JOIN rooms ON rooms.id = userrooms.roomid ' +
             'LEFT JOIN messages ON messages.roomid = userrooms.roomid ' +
             'LEFT JOIN users ON users.id = messages.userid ' +
             'WHERE rooms.title IS NOT NULL AND userrooms.userid = $1 ' +
-            'GROUP BY 1,2,3 ' +
+            'GROUP BY 1,2,3,4 ' +
             'ORDER BY stime', [req.params.userId]);
         res.status(200).json(availableRooms.rows);
     } else {
