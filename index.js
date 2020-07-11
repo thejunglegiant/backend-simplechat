@@ -22,27 +22,33 @@ const router = require('./router');
 app.use(router);
 
 io.on('connect', (socket) => {
-    let socketId = '';
-    console.log(`user connected`);
-    // socket.on('register', (str) => {
-    //     console.log(str);
-    // });
-    socket.emit('register', "sdf");
-
-    socket.on('verify_user', async (id) => {
-        console.log(id)
-        const res = await pool.query('SELECT * FROM users WHERE userId = $1', [id]);
-        if (res.rowCount < 1) {
-            io.to(socket).emit('register');
+    let user_id = '';
+    let username = '';
+    console.log('user connected');
+    socket.on('onUidSent', async id => {
+        user_id = id;
+        username = (await pool.query('SELECT firstname FROM users WHERE id = $1 LIMIT 1', [id])).rows[0].firstname;
+        const availableRooms = (await pool.query('SELECT roomid FROM userrooms WHERE userid = $1', [id])).rows;
+        for (let room of availableRooms) {
+            socket.join(room.roomid);
         }
-        socketId = id;
-        console.log(res.rows);
     });
 
-
+    socket.on('onNewMessageSent', async (newMessage) => {
+        const time = new Date().getTime();
+        newMessage = await JSON.parse(newMessage);
+        pool.query('insert into messages (userid, roomid, body, sendingtime) values (' +
+            '$1, $2, $3, current_timestamp)', [newMessage.userId, newMessage.roomId, newMessage.body]);
+        io.in(newMessage.roomId).emit("onNewMessageReceived", {
+            roomId: newMessage.roomId,
+            firstname: username,
+            body: newMessage.body,
+            stime: time,
+        });
+    });
 
     socket.on('disconnect', () => {
-        pool.query('UPDATE users SET last_session = current_timestamp WHERE id = $1', [socketId]);
+        pool.query('UPDATE users SET last_session = current_timestamp WHERE id = $1', [user_id]);
         console.log(`user disconnected`);
     });
 })
