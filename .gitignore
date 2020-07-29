@@ -105,4 +105,4 @@ tmp/
 temp/
 
 # For personal settings (host, password, etc.)
-settings.js
+.env
