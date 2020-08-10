@@ -2,6 +2,8 @@ const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const bodyparser = require('body-parser');
+// const admin = require('firebase-admin');
+// const serviceAccount = require('./firebase-adminsdk.json');
 const sequelize = require('./database');
 const Users = require('./models/Users');
 const UserRooms = require('./models/UserRooms');
@@ -13,6 +15,7 @@ app.use(bodyparser.urlencoded({extended: true}));
 app.use(bodyparser.json());
 
 const router = require('./router');
+const { env } = require('process');
 app.use(router);
 
 const activeUsers = new Map();
@@ -77,6 +80,7 @@ io.on('connect', (socket) => {
         io.in(newMessage.roomId).emit("onNewMessageReceived", {
             roomId: newMessage.roomId,
             firstname,
+            lastname,
             body: newMessage.body,
             stime: time,
         });
@@ -86,8 +90,16 @@ io.on('connect', (socket) => {
         sequelize.query(`UPDATE users SET last_session = current_timestamp WHERE id = '${user_id}'`);
         console.log(`user disconnected`);
     });
-})
+});
+
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+//   databaseURL: process.env.DATABASE_URL
+// });
+
+
+
 
 server.listen(PORT, () => {
     console.log(`Server runs on port ${PORT}`);
-})
+});
