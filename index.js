@@ -2,8 +2,6 @@ const app = require('express')();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const bodyparser = require('body-parser');
-// const admin = require('firebase-admin');
-// const serviceAccount = require('./firebase-adminsdk.json');
 const sequelize = require('./database');
 const Users = require('./models/Users');
 const UserRooms = require('./models/UserRooms');
@@ -26,7 +24,6 @@ io.on('connect', (socket) => {
     socket.on('sync', async user => {
         user = await JSON.parse(user);
         user_id = user.id;
-        console.log(user);
         activeUsers.set(user.id, socket);
         const currentUser = await Users.findByPk(user.id);
         if (currentUser == null) {
@@ -52,16 +49,10 @@ io.on('connect', (socket) => {
     socket.on("onNewGroupCreated", async newGroup => {
         newGroup = await JSON.parse(newGroup);
         const currentRoomId = (await Rooms.create({ title: newGroup.title })).get('id');
-        sequelize.query(`INSERT INTO userrooms (userid, roomid, isadmin) VALUES ('${user_id}', ${currentRoomId}, true)`)
+        sequelize.query(`INSERT INTO userrooms (userid, roomid, isadmin) VALUES ('${user_id}', ${currentRoomId}, true)`);
         socket.emit('onNewGroupAdded');
-        // Rooms.create({ title: newGroup.title }).then(room => {
-        //     UserRooms.create({ userId: user_id, roomId: room.get('id'), isadmin: true }).then(relation => {
-        //         socket.emit('onNewGroupAdded');
-        //     }).catch(err => { console.error(err) });
-        // });
         for (let user of newGroup.users) {
-            sequelize.query(`INSERT INTO userrooms (userid, roomid, isadmin) VALUES ('${user.id}', ${currentRoomId}, false)`)
-            // UserRooms.create({ userId: user.id, roomId: currentRoomId, isadmin: false});
+            sequelize.query(`INSERT INTO userrooms (userid, roomid, isadmin) VALUES ('${user.id}', ${currentRoomId}, false)`);
             if (activeUsers.has(user.id)) {
                 activeUsers.get(user.id).join(currentRoomId);
                 activeUsers.get(user.id).emit('onNewGroupAdded');
@@ -72,18 +63,53 @@ io.on('connect', (socket) => {
     socket.on('onNewMessageSent', async (newMessage) => {
         const time = new Date().getTime();
         newMessage = await JSON.parse(newMessage);
-        sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime) VALUES (' +
-            `'${newMessage.userId}', ${newMessage.roomId}, '${newMessage.body}', current_timestamp)`)
-            .catch(err => {
-                console.error(err);
-            });
-        io.in(newMessage.roomId).emit("onNewMessageReceived", {
+        sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
+            `'${newMessage.userId}', ${newMessage.roomId}, '${newMessage.body}', current_timestamp, 0)`)
+        .catch(err => {
+            console.error(err);
+        });
+
+        const currentRoom = await Rooms.findByPk(newMessage.roomId);
+        io.in(newMessage.roomId).emit('onNewMessageReceived', {
             roomId: newMessage.roomId,
+            roomTitle: currentRoom.get('title'),
             firstname,
             lastname,
             body: newMessage.body,
             stime: time,
+            viewtype: 0,
         });
+    });
+
+    socket.on('onLeaveGroup', async (newMessage) => {
+        newMessage = await JSON.parse(newMessage);
+        const time = new Date().getTime();
+        await sequelize.query(`DELETE FROM userrooms WHERE userid = '${user_id}' AND roomid = ${newMessage.roomId}`);
+        activeUsers.get(user_id).leave(newMessage.roomId);
+        socket.emit('onYouLeftGroup');
+        
+        sequelize.query('INSERT INTO messages (userid, roomid, sendingtime, viewtype) VALUES (' +
+        `'${newMessage.userId}', ${newMessage.roomId}, current_timestamp, 1)`)
+        .catch(err => {
+            console.error(err);
+        });
+        
+        const members = (await sequelize.query(`SELECT COUNT(*) AS members FROM userrooms WHERE roomid = ${newMessage.roomId}`))[0][0].members;
+        const currentRoom = await Rooms.findByPk(newMessage.roomId);
+        io.in(newMessage.roomId).emit('onSomeoneLeftGroup', {
+            roomId: newMessage.roomId,
+            roomTitle: currentRoom.get('title'),
+            firstname,
+            lastname,
+            stime: time,
+            viewtype: 1,
+            members,
+        });
+
+        // Delete the group if it is empty
+        if (members < 1) {
+            sequelize.query(`DELETE FROM rooms WHERE id = ${newMessage.roomId}`);
+        }
     });
 
     socket.on('disconnect', () => {
@@ -91,14 +117,6 @@ io.on('connect', (socket) => {
         console.log(`user disconnected`);
     });
 });
-
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount),
-//   databaseURL: process.env.DATABASE_URL
-// });
-
-
-
 
 server.listen(PORT, () => {
     console.log(`Server runs on port ${PORT}`);

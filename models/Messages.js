@@ -11,28 +11,18 @@ Messages.init(
         primaryKey: true,
         autoIncrement: true
     },
-    // userid: {
-    //     type: DataTypes.STRING(28),
-    //     references: {
-    //         model: Users,
-    //         key: 'id',
-    //     }
-    // },
-    // roomid: {
-    //     type: DataTypes.INTEGER,
-    //     references: {
-    //         model: Rooms,
-    //         key: 'id'
-    //     }
-    // },
     body: {
         type: DataTypes.STRING(1000),
-        allowNull: false
+        allowNull: true,
     },
     sendingtime: {
         type: DataTypes.DATE,
         allowNull: false,
         default: DataTypes.NOW
+    },
+    viewtype: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
     },
   },
   {

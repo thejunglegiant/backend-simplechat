@@ -21,7 +21,8 @@ router.get('/:userId/getRooms', async (req, res) => {
     const currentUser = await Users.findByPk(req.params.userId);
     if (currentUser != null) {
         const availableRooms = await sequelize.query(
-            'SELECT rooms.id, rooms.title, users.firstname, messages.body AS last_message, messages.sendingtime AS stime ' +
+            'SELECT rooms.id, rooms.title, users.firstname, users.lastname, ' +
+            'messages.body AS last_message, messages.sendingtime AS stime, messages.viewtype AS message_viewtype ' +
             'FROM userrooms ' +
             'LEFT JOIN rooms ON rooms.id = userrooms.roomid ' +
             'LEFT JOIN (SELECT roomid, MAX(sendingtime) AS lastmess ' +
@@ -37,16 +38,17 @@ router.get('/:userId/getRooms', async (req, res) => {
     }
 });
 
-router.get('/:userId/:roomId/getMessages', async (req, res) => {
+router.get('/:userId/:roomId/getExactRoom', async (req, res) => {
     const currentUser = await Users.findByPk(req.params.userId);
     if (currentUser != null) {
         const messages = await sequelize.query(
-            `SELECT (users.id = '${req.params.userId}') as issender, users.firstname, users.lastname, messages.body, messages.sendingtime AS stime ` +
+            `SELECT (users.id = '${req.params.userId}') as issender, users.firstname, users.lastname, messages.body, messages.sendingtime AS stime, messages.viewtype ` +
             'FROM messages ' +
             'LEFT JOIN users ON users.id = messages.userid ' +
             `WHERE messages.roomid = '${req.params.roomId}' ` +
             'ORDER BY stime');
-        res.status(200).json(messages[0]);
+        const members = (await sequelize.query(`SELECT COUNT(*) AS members FROM userrooms WHERE roomid = ${req.params.roomId}`))[0][0].members;
+        res.status(200).json({ members, messages: messages[0] });
     } else {
         res.status(400);
     }
