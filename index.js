@@ -112,7 +112,12 @@ io.on('connect', (socket) => {
         }
     });
 
+    socket.on('typing', async (roomId) => {
+        socket.to(roomId).emit('onTyping', { firstname, roomId });
+    });
+
     socket.on('disconnect', () => {
+        activeUsers.delete(user_id);
         sequelize.query(`UPDATE users SET last_session = current_timestamp WHERE id = '${user_id}'`);
         console.log(`user disconnected`);
     });
