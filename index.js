@@ -71,6 +71,7 @@ io.on('connect', (socket) => {
 
         const currentRoom = await Rooms.findByPk(newMessage.roomId);
         io.in(newMessage.roomId).emit('onNewMessageReceived', {
+            userId: newMessage.userId,
             roomId: newMessage.roomId,
             roomTitle: currentRoom.get('title'),
             firstname,
