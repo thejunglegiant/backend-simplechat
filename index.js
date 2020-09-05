@@ -66,14 +66,19 @@ io.on('connect', (socket) => {
         newMessage = await JSON.parse(newMessage);
         sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
             `'${newMessage.userid}', ${newMessage.roomId}, '${newMessage.body}', current_timestamp, 0)`)
-            .then((err, message) => {
-                console.log(message);
-            })
-        .catch(err => {
-            console.error(err);
-        });
+            .catch(err => {
+                console.error(err);
+            });
 
         const currentRoom = await Rooms.findByPk(newMessage.roomId);
+        Messages.findOne({
+            where: {
+                userid: newMessage.userid,
+                roomid: newMessage.roomId,
+            }
+        }).then(message => {
+            console.log(message);
+        });
         // const message = await sequelize.query(`SELECT * FROM messages WHERE userid = '${newMessage.userid}' AND roomid = '${newMessage.roomId}'`);
         // console.log(message);
         io.in(newMessage.roomId).emit('onNewMessageReceived', {
