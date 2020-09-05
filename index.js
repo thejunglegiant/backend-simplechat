@@ -81,7 +81,6 @@ io.on('connect', (socket) => {
             viewtype: 0,
         });
     });
-    });
 
     socket.on('onDeleteMessage', async (arr) => {
         arr = await JSON.parse(arr);
