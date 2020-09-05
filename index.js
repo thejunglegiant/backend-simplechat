@@ -14,6 +14,7 @@ app.use(bodyparser.json());
 
 const router = require('./router');
 const { env } = require('process');
+const Messages = require('./models/Messages');
 app.use(router);
 
 const activeUsers = new Map();
@@ -70,7 +71,10 @@ io.on('connect', (socket) => {
         });
 
         const currentRoom = await Rooms.findByPk(newMessage.roomId);
+        const message = await sequelize.query(`SELECT * FROM messages WHERE userid = '${newMessage.userid}' AND roomid = '${newMessage.roomId}'`);
+        console.log(message);
         io.in(newMessage.roomId).emit('onNewMessageReceived', {
+            // id: 
             userId: newMessage.userid,
             roomId: newMessage.roomId,
             roomTitle: currentRoom.get('title'),
