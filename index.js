@@ -81,6 +81,28 @@ io.on('connect', (socket) => {
             viewtype: 0,
         });
     });
+    });
+
+    socket.on('onDeleteMessage', async (arr) => {
+        arr = await JSON.parse(arr);
+        // sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
+        //     `'${arr.userid}', ${arr.roomId}, '${arr.body}', current_timestamp, 0)`)
+        // .catch(err => {
+        //     console.error(err);
+        // });
+
+        // const currentRoom = await Rooms.findByPk(arr.roomId);
+        // io.in(arr.roomId).emit('onNewMessageReceived', {
+        //     userId: arr.userid,
+        //     roomId: arr.roomId,
+        //     roomTitle: currentRoom.get('title'),
+        //     firstname,
+        //     lastname,
+        //     body: arr.body,
+        //     stime: time,
+        //     viewtype: 0,
+        // });
+    });
 
     socket.on('onLeaveGroup', async (newMessage) => {
         newMessage = await JSON.parse(newMessage);
