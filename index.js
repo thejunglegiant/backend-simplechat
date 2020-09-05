@@ -77,7 +77,7 @@ io.on('connect', (socket) => {
                 roomid: newMessage.roomId,
             }
         }).then(message => {
-            console.log(message);
+            console.log('id =----= ' + message.get('id'));
         });
         // const message = await sequelize.query(`SELECT * FROM messages WHERE userid = '${newMessage.userid}' AND roomid = '${newMessage.roomId}'`);
         // console.log(message);
