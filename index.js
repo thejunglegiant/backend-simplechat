@@ -3,7 +3,6 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const bodyparser = require('body-parser');
 const sequelize = require('./database');
-const Sequelize = require('sequelize');
 const Users = require('./models/Users');
 const UserRooms = require('./models/UserRooms');
 const Rooms = require('./models/Rooms');
@@ -16,7 +15,6 @@ app.use(bodyparser.json());
 const router = require('./router');
 const { env } = require('process');
 const Messages = require('./models/Messages');
-const { Sequelize } = require('sequelize/types');
 app.use(router);
 
 const activeUsers = new Map();
@@ -64,25 +62,34 @@ io.on('connect', (socket) => {
     });
 
     socket.on('onNewMessageSent', async (newMessage) => {
-        const time = Sequelize.fn('currdate');
-        console.log(time);
+        // const time = Sequelize.fn('currdate');
+        // console.log(time);
         newMessage = await JSON.parse(newMessage);
-        sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
-        `'${newMessage.userid}', ${newMessage.roomId}, '${newMessage.body}', '${time}', 0)`)
-        .catch(err => {
-            console.error(err);
-        });
+        let id = -100;
+        Messages.create({
+            body: newMessage.body, viewtype: 0
+        }).then(val => {
+            id = val.get('id');
+            sequelize.query(`update messages set userid = '${newMessage.userid}', roomid = ${newMessage.roomId}, sendingtime = current_timestamp where id = ${id}`);
+        }).catch(err => {
+            console.log(err);
+        })
+        // sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
+        // `'${newMessage.userid}', ${newMessage.roomId}, '${newMessage.body}', '${time}', 0)`)
+        // .catch(err => {
+        //     console.error(err);
+        // });
 
         const currentRoom = await Rooms.findByPk(newMessage.roomId);
-        const newMessageId = (await Messages.findOne({
-            where: {
-                userid: newMessage.userid,
-                roomid: newMessage.roomId,
-                sendingtime: time
-            }
-        })).get('id');
+        // const newMessageId = (await Messages.findOne({
+        //     where: {
+        //         userid: newMessage.userid,
+        //         roomid: newMessage.roomId,
+        //         sendingtime: time
+        //     }
+        // })).get('id');
         io.in(newMessage.roomId).emit('onNewMessageReceived', {
-            id: newMessageId,
+            id: id,
             userId: newMessage.userid,
             roomId: newMessage.roomId,
             roomTitle: currentRoom.get('title'),
