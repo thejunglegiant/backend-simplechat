@@ -84,6 +84,7 @@ io.on('connect', (socket) => {
 
     socket.on('onDeleteMessage', async (arr) => {
         arr = await JSON.parse(arr);
+        console.log(arr);
         let ids = [];
         for (let item of arr) {
             ids.push(item.id);
