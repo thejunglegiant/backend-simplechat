@@ -64,14 +64,14 @@ io.on('connect', (socket) => {
         const time = new Date().getTime();
         newMessage = await JSON.parse(newMessage);
         sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
-            `'${newMessage.userId}', ${newMessage.roomId}, '${newMessage.body}', current_timestamp, 0)`)
+            `'${newMessage.userid}', ${newMessage.roomId}, '${newMessage.body}', current_timestamp, 0)`)
         .catch(err => {
             console.error(err);
         });
 
         const currentRoom = await Rooms.findByPk(newMessage.roomId);
         io.in(newMessage.roomId).emit('onNewMessageReceived', {
-            userId: newMessage.userId,
+            userId: newMessage.userid,
             roomId: newMessage.roomId,
             roomTitle: currentRoom.get('title'),
             firstname,
