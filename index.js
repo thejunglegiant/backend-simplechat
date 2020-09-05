@@ -66,7 +66,7 @@ io.on('connect', (socket) => {
         newMessage = await JSON.parse(newMessage);
         sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
             `'${newMessage.userid}', ${newMessage.roomId}, '${newMessage.body}', current_timestamp, 0)`)
-            .then(message => {
+            .then((err, message) => {
                 console.log(message);
             })
         .catch(err => {
