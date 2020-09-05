@@ -3,7 +3,8 @@ const router = express.Router();
 const sequelize = require('./database');
 const Users = require('./models/Users');
 
-router.get('/', (_, res) => {
+router.get('/', async (_, res) => {
+    // console.log(typeof (await sequelize.query('select current_timestamp as time'))[0][0].time);
     res.send('Server works');
 });
 
