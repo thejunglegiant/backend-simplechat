@@ -3,6 +3,7 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const bodyparser = require('body-parser');
 const sequelize = require('./database');
+const Sequelize = require('sequelize');
 const Users = require('./models/Users');
 const UserRooms = require('./models/UserRooms');
 const Rooms = require('./models/Rooms');
