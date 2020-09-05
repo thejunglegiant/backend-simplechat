@@ -17,7 +17,7 @@ Messages.init(
     },
     sendingtime: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
         default: DataTypes.NOW
     },
     viewtype: {
