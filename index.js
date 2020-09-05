@@ -15,6 +15,7 @@ app.use(bodyparser.json());
 const router = require('./router');
 const { env } = require('process');
 const Messages = require('./models/Messages');
+const { Sequelize } = require('sequelize/types');
 app.use(router);
 
 const activeUsers = new Map();
@@ -67,10 +68,10 @@ io.on('connect', (socket) => {
         newMessage = await JSON.parse(newMessage);
         let id = -100;
         Messages.create({
-            body: newMessage.body, viewtype: 0
+            body: newMessage.body, sendingtime: Sequelize.fn('currdate'), viewtype: 0
         }).then(val => {
             id = val.get('id');
-            sequelize.query(`update messages set userid = '${newMessage.userid}', roomid = ${newMessage.roomId}, sendingtime = current_timestamp where id = ${id}`);
+            sequelize.query(`update messages set userid = '${newMessage.userid}', roomid = ${newMessage.roomId} where id = ${id}`);
         }).catch(err => {
             console.log(err);
         })
