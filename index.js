@@ -15,6 +15,7 @@ app.use(bodyparser.json());
 const router = require('./router');
 const { env } = require('process');
 const Messages = require('./models/Messages');
+const { Sequelize } = require('sequelize/types');
 app.use(router);
 
 const activeUsers = new Map();
@@ -62,10 +63,11 @@ io.on('connect', (socket) => {
     });
 
     socket.on('onNewMessageSent', async (newMessage) => {
-        const time = new Date().getTime();
+        const time = Sequelize.fn('currdate');
+        console.log(time);
         newMessage = await JSON.parse(newMessage);
         sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
-            `'${newMessage.userid}', ${newMessage.roomId}, '${newMessage.body}', current_timestamp, 0)`)
+        `'${newMessage.userid}', ${newMessage.roomId}, '${newMessage.body}', '${time}', 0)`)
         .catch(err => {
             console.error(err);
         });
@@ -75,7 +77,7 @@ io.on('connect', (socket) => {
             where: {
                 userid: newMessage.userid,
                 roomid: newMessage.roomId,
-                body: newMessage.body,
+                sendingtime: time
             }
         })).get('id');
         io.in(newMessage.roomId).emit('onNewMessageReceived', {
