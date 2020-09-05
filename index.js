@@ -75,6 +75,7 @@ io.on('connect', (socket) => {
             where: {
                 userid: newMessage.userid,
                 roomid: newMessage.roomId,
+                body: newMessage.body,
             }
         })).get('id');
         io.in(newMessage.roomId).emit('onNewMessageReceived', {
