@@ -84,24 +84,20 @@ io.on('connect', (socket) => {
 
     socket.on('onDeleteMessage', async (arr) => {
         arr = await JSON.parse(arr);
-        console.log(arr);
-        // sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
-        //     `'${arr.userid}', ${arr.roomId}, '${arr.body}', current_timestamp, 0)`)
-        // .catch(err => {
-        //     console.error(err);
-        // });
+        let ids = [];
+        for (let item of arr) {
+            ids.push(item.id);
+            sequelize.query(`DELETE FROM messages WHERE id = '${item.id}'`)
+            .catch(err => {
+                console.error(err);
+            });
+        }
 
-        // const currentRoom = await Rooms.findByPk(arr.roomId);
-        // io.in(arr.roomId).emit('onNewMessageReceived', {
-        //     userId: arr.userid,
-        //     roomId: arr.roomId,
-        //     roomTitle: currentRoom.get('title'),
-        //     firstname,
-        //     lastname,
-        //     body: arr.body,
-        //     stime: time,
-        //     viewtype: 0,
-        // });
+        // const currentRoom = await Rooms.findByPk(arr[0].roomId);
+        io.in(arr[0].roomId).emit('onSomeMessagesDeleted', {
+            roomId: arr[0].roomId,
+            ids
+        });
     });
 
     socket.on('onLeaveGroup', async (newMessage) => {
