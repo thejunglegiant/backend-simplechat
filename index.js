@@ -85,6 +85,7 @@ io.on('connect', (socket) => {
 
     socket.on('onDeleteMessage', async (arr) => {
         arr = await JSON.parse(arr);
+        console.log(arr);
         // sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
         //     `'${arr.userid}', ${arr.roomId}, '${arr.body}', current_timestamp, 0)`)
         // .catch(err => {
