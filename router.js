@@ -42,8 +42,8 @@ router.get('/:userId/:roomId/getExactRoom', async (req, res) => {
     const currentUser = await Users.findByPk(req.params.userId);
     if (currentUser != null) {
         const messages = await sequelize.query(
-            `SELECT (users.id = '${req.params.userId}') as issender, messages.userid, users.firstname, users.lastname, ' +
-            'messages.id, messages.body, messages.sendingtime AS stime, messages.viewtype ` +
+            `SELECT (users.id = '${req.params.userId}') as issender, messages.userid, users.firstname, users.lastname, ` +
+            'messages.id, messages.body, messages.sendingtime AS stime, messages.viewtype ' +
             'FROM messages ' +
             'LEFT JOIN users ON users.id = messages.userid ' +
             `WHERE messages.roomid = '${req.params.roomId}' ` +
