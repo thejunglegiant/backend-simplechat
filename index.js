@@ -62,6 +62,7 @@ io.on('connect', (socket) => {
     });
 
     socket.on('onNewMessageSent', async (newMessage) => {
+        const time = new Date().getTime();
         newMessage = await JSON.parse(newMessage);
         sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
             `'${newMessage.userid}', ${newMessage.roomId}, '${newMessage.body}', current_timestamp, 0)`)
@@ -87,7 +88,7 @@ io.on('connect', (socket) => {
             firstname,
             lastname,
             body: newMessage.body,
-            stime: savedMessage.get('sendingtime'),
+            stime: time,
             viewtype: 0,
         });
     });
