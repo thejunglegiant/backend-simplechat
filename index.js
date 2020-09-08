@@ -63,9 +63,8 @@ io.on('connect', (socket) => {
 
     socket.on('onNewMessageSent', async (newMessage) => {
         newMessage = await JSON.parse(newMessage);
-        const time = (await sequelize.query('select current_timestamp as time'))[0][0].time;
         sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
-            `'${newMessage.userid}', ${newMessage.roomId}, '${newMessage.body}', '${time}', 0)`)
+            `'${newMessage.userid}', ${newMessage.roomId}, '${newMessage.body}', current_timestamp, 0)`)
         .catch(err => {
             console.error(err);
         });
@@ -75,12 +74,13 @@ io.on('connect', (socket) => {
             where: {
                 userid: newMessage.userid,
                 roomid: newMessage.roomId,
-                sendingtime: time
-            }
+            },
+            order: sequelize.fn('max', sequelize.col('sendingtime')),
+            limit: 1,
         })).get('id');
         console.log('id -======-' + newMessageId);
         io.in(newMessage.roomId).emit('onNewMessageReceived', {
-            id: id,
+            id: newMessageId,
             userId: newMessage.userid,
             roomId: newMessage.roomId,
             roomTitle: currentRoom.get('title'),
