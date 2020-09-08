@@ -75,10 +75,10 @@ io.on('connect', (socket) => {
                 userid: newMessage.userid,
                 roomid: newMessage.roomId,
             },
-            order: ['sendingtime', 'DESC'],
+            order: [['sendingtime', 'DESC']],
             limit: 1,
         }).catch(err => { console.error(err) })).get('id');
-        console.log('id -======-' + newMessageId);
+        
         io.in(newMessage.roomId).emit('onNewMessageReceived', {
             id: newMessageId,
             userId: newMessage.userid,
