@@ -70,24 +70,24 @@ io.on('connect', (socket) => {
         });
 
         const currentRoom = await Rooms.findByPk(newMessage.roomId);
-        const newMessageId = (await Messages.findOne({
+        const savedMessage = await Messages.findOne({
             where: {
                 userid: newMessage.userid,
                 roomid: newMessage.roomId,
             },
             order: [['sendingtime', 'DESC']],
             limit: 1,
-        }).catch(err => { console.error(err) })).get('id');
+        }).catch(err => { console.error(err) });
         
         io.in(newMessage.roomId).emit('onNewMessageReceived', {
-            id: newMessageId,
+            id: savedMessage.get('id'),
             userId: newMessage.userid,
             roomId: newMessage.roomId,
             roomTitle: currentRoom.get('title'),
             firstname,
             lastname,
             body: newMessage.body,
-            stime: time,
+            stime: savedMessage.get('sendingtime'),
             viewtype: 0,
         });
     });
