@@ -6,6 +6,7 @@ const sequelize = require('./database');
 const Users = require('./models/Users');
 const UserRooms = require('./models/UserRooms');
 const Rooms = require('./models/Rooms');
+const Messages = require('./models/Messages');
 
 const PORT = process.env.PORT || 3000;
 
