@@ -77,7 +77,7 @@ io.on('connect', (socket) => {
             },
             order: sequelize.fn('max', sequelize.col('sendingtime')),
             limit: 1,
-        })).get('id');
+        }).catch(err => { console.error(err) })).get('id');
         console.log('id -======-' + newMessageId);
         io.in(newMessage.roomId).emit('onNewMessageReceived', {
             id: newMessageId,
