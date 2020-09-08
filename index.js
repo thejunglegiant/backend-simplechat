@@ -94,7 +94,7 @@ io.on('connect', (socket) => {
     });
 
     socket.on('onDeleteMessage', async (stringData) => {
-        const data = await JSON.parse(stringData.trim());
+        const data = await JSON.parse(JSON.stringify(stringData));
         console.log(data);
         let ids = [];
         for (let item of data.array) {
