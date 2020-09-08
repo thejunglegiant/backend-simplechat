@@ -3,10 +3,7 @@ const router = express.Router();
 const sequelize = require('./database');
 const Users = require('./models/Users');
 
-router.get('/:jsonString', async (req, res) => {
-    // console.log(typeof (await sequelize.query('select current_timestamp as time'))[0][0].time);
-    const data = await JSON.parse(req.params.jsonString);
-    console.log(data);
+router.get('/', async (_, res) => {
     res.send('Server works');
 });
 

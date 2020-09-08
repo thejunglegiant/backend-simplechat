@@ -95,8 +95,8 @@ io.on('connect', (socket) => {
 
     socket.on('onDeleteMessage', async (data) => {
         data = await JSON.parse(data);
-        console.log(data);
         let ids = [];
+        
         for (let item of data.array) {
             ids.push(item.id);
             sequelize.query(`DELETE FROM messages WHERE id = '${item.id}'`)
@@ -105,7 +105,6 @@ io.on('connect', (socket) => {
             });
         }
 
-        // const currentRoom = await Rooms.findByPk(arr[0].roomId);
         io.in(data.roomId).emit('onSomeMessagesDeleted', {
             roomId: data.roomId,
             ids
