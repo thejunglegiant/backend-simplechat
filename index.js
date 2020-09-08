@@ -75,7 +75,7 @@ io.on('connect', (socket) => {
                 userid: newMessage.userid,
                 roomid: newMessage.roomId,
             },
-            order: sequelize.fn('max', sequelize.col('sendingtime')),
+            order: ['sendingtime', 'DESC'],
             limit: 1,
         }).catch(err => { console.error(err) })).get('id');
         console.log('id -======-' + newMessageId);
