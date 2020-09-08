@@ -93,8 +93,8 @@ io.on('connect', (socket) => {
         });
     });
 
-    socket.on('onDeleteMessage', async (data) => {
-        data = await JSON.parse(data.trim());
+    socket.on('onDeleteMessage', async (stringData) => {
+        const data = await JSON.parse(stringData);
         console.log(data.array);
         let ids = [];
         for (let item of data.array) {
