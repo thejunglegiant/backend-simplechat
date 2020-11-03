@@ -12,6 +12,10 @@ router.get('/privacy-policy', (_, res) => {
     res.sendFile(path.join(__dirname+'/privacy_policy.html'));
 });
 
+router.get('/terms-conditions', (_, res) => {
+    res.sendFile(path.join(__dirname+'/terms_conditions.html'));
+});
+
 router.get('/:userId/getUsers', async (req, res) => {
     const currentUser = await Users.findByPk(req.params.userId);
     if (currentUser != null) {
