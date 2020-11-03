@@ -3,6 +3,7 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server);
 const bodyparser = require('body-parser');
 const sequelize = require('./database');
+const fs = require('fs');
 const Users = require('./models/Users');
 const UserRooms = require('./models/UserRooms');
 const Rooms = require('./models/Rooms');
@@ -15,6 +16,7 @@ app.use(bodyparser.json());
 
 const router = require('./router');
 const { env } = require('process');
+const { error } = require('console');
 app.use(router);
 
 const activeUsers = new Map();
@@ -64,6 +66,11 @@ io.on('connect', (socket) => {
     socket.on('onNewMessageSent', async (newMessage) => {
         const time = new Date().getTime();
         newMessage = await JSON.parse(newMessage);
+        // console.log("===============\n" + newMessage.images + "\n===============");
+        let buff = Buffer.from(newMessage.images[0], 'base64');
+        fs.write('my-file.png', buff, (err) => {
+            if (err) throw err;
+        });
         sequelize.query('INSERT INTO messages (userid, roomid, body, sendingtime, viewtype) VALUES (' +
             `'${newMessage.userid}', ${newMessage.roomId}, '${newMessage.body}', current_timestamp, 0)`)
         .catch(err => {

@@ -1,10 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const sequelize = require('./database');
+const path = require('path');
 const Users = require('./models/Users');
 
 router.get('/', async (_, res) => {
     res.send('Server works');
+});
+
+router.get('/privacy-policy', (_, res) => {
+    res.sendFile(path.join(__dirname+'/privacy_policy.html'));
 });
 
 router.get('/:userId/getUsers', async (req, res) => {
